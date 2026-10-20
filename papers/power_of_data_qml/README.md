@@ -163,8 +163,9 @@ models/                unused: kernel methods have no trained artifacts to keep
 pip install -r papers/power_of_data_qml/requirements.txt
 ```
 
-Smoke run (about 2 min on a laptop; `defaults.json`: n = 3–4, 2 seeds, tiny
-grids; not for reported results):
+Smoke run (about 35 s on an Apple M5 after the first-run data download;
+`defaults.json`: n = 3, 1 seed, embeddings E1 and E3, tiny grids; sized for the
+repository smoke test's 120 s limit, not for reported results):
 
 ```bash
 # From the repository root
@@ -256,12 +257,16 @@ Fashion-MNIST, the original dataset used by the paper:
   (https://github.com/zalandoresearch/fashion-mnist), MIT License.
 - Path: `data/power_of_data_qml/fashion_mnist/`, under the repository data root
   (`DATA_DIR` or `--data-root` override it). It holds the four official
-  gzipped IDX files plus `MD5SUMS` and `SHA256SUMS`. The real dataset was used
-  in every reported run; no synthetic fallback was needed.
+  gzipped IDX files (about 30 MB). They are **downloaded automatically on first
+  use** and checked against the published MD5 sums (`lib/data.py::ensure_fashion_mnist`;
+  two mirrors, a checksum mismatch or failed download raises). The directory is
+  gitignored. The real dataset was used in every reported run; there is no
+  synthetic fallback.
 - Contents: all 70,000 images (60k train + 10k test), 10 balanced classes. PCA
   is fit on all 70k images; the paper's standardization and 800-point
   subsampling are applied in code.
-- Acquisition (from the repository root):
+- Manual acquisition, if the automatic download is not possible (from the
+  repository root):
 
   ```bash
   mkdir -p data/power_of_data_qml/fashion_mnist && cd data/power_of_data_qml/fashion_mnist
@@ -272,8 +277,12 @@ Fashion-MNIST, the original dataset used by the paper:
   md5sum -c MD5SUMS   # macOS: md5 -r *.gz and compare with MD5SUMS
   ```
 
-- Paper reference values: the Source Data workbook under
-  `data/power_of_data_qml/sources/` (see `VISITED_URLS.md`).
+- Paper reference values: the journal's Source Data (Nat. Commun. 12, 2631,
+  Supplementary Data 2, open access under CC BY 4.0), converted to one CSV per
+  sheet and **committed** under
+  `data/power_of_data_qml/sources/natcommun_esm/source_data_csv/` (15 files, 53 KB;
+  the root `.gitignore` carries an exception for exactly this folder). Source:
+  https://static-content.springer.com/esm/art%3A10.1038%2Fs41467-021-22539-9/MediaObjects/41467_2021_22539_MOESM2_ESM.xlsx
 - Limitations: the paper releases no preprocessed features or labels. The QNN
   labels and the engineered labels are regenerated from the paper's procedure,
   so they follow the paper's distribution, not its exact samples.

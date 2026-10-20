@@ -3,6 +3,11 @@
   "dtype": "float32",
   "device": "cuda:0",
   "study": {
+    "embeddings": [
+      "E1",
+      "E2",
+      "E3"
+    ],
     "system_sizes": [
       17,
       18,

@@ -31,7 +31,9 @@ def source_data_dir(data_root: str | Path) -> Path:
 def _read_rows(path: Path) -> list[list[str]]:
     if not path.is_file():
         raise FileNotFoundError(
-            f"{path} not found; regenerate it from the Source Data workbook (VISITED_URLS.md)"
+            f"{path} not found. The journal Source Data CSVs are committed under "
+            "data/power_of_data_qml/sources/natcommun_esm/source_data_csv/; see the Data "
+            "section of papers/power_of_data_qml/README.md"
         )
     with path.open(newline="") as handle:
         rows = list(csv.reader(handle))

@@ -1,6 +1,11 @@
 {
   "description": "Paper-scale study (RED tier, reference config): arXiv Figs. 1, 2, S1, S3 at n=3-30, 10 seeds, paper grids. QK limited to 29 qubits (paper reports QK up to n=28). Needs >=32 GB statevectors at n=30 (E3); not runnable on the laptop or the 23 GB L4 in full.",
   "study": {
+    "embeddings": [
+      "E1",
+      "E2",
+      "E3"
+    ],
     "system_sizes": [
       3,
       4,

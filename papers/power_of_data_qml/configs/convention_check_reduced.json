@@ -2,6 +2,11 @@
   "description": "EXP-AMB: compare inferred conventions (AMB-1, 2, 3, 7, 13, 15, 17) with the journal Source Data at n=3-6, 3 seeds, paper grids, paper protocol only. Selection rule: smallest mean relative error to the paper per (component, quantity, embedding).",
   "experiment": "convention_check",
   "study": {
+    "embeddings": [
+      "E1",
+      "E2",
+      "E3"
+    ],
     "system_sizes": [
       3,
       4,

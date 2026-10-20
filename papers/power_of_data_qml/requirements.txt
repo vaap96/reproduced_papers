@@ -7,6 +7,8 @@ scikit-learn>=1.5
 torch>=2.4
 joblib>=1.4
 matplotlib>=3.8
+# notebook.ipynb tables; to run it also install jupyter (or ipykernel) in this environment.
+pandas>=2.0
 # The shared runtime (runtime_lib) imports MerLin and Perceval at start-up.
 # lib/photonic_merlin.py uses the 0.2.x QuantumLayer/MeasurementStrategy API (enum).
 merlinquantum==0.2.3

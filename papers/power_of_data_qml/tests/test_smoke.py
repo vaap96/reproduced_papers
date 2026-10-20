@@ -41,7 +41,7 @@ def test_tiny_study_run_writes_valid_evidence(tmp_path):
                 "--cv-system-sizes",
                 "3",
                 "--n-jobs",
-                "1",
+                "4",
                 "--outdir",
                 str(tmp_path),
                 "--data-root",

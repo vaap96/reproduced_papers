@@ -12,14 +12,17 @@ Pipeline (arXiv:2011.01938 App. J; AMB-10 for the PCA fit set):
    quantum and engineered datasets, and from classes 3 (dress) and 6 (shirt)
    for Dataset (C).
 
-There is no synthetic fallback: the real dataset is required (LOG.md Data
-Acquisition Log), and a missing file raises with the re-acquisition command.
+There is no synthetic fallback: the real dataset is required. Missing files are
+downloaded once from the official release and verified against the MD5 sums that
+Zalando publishes; a failed download or a checksum mismatch raises.
 """
 
 from __future__ import annotations
 
 import gzip
+import hashlib
 import logging
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -38,15 +41,80 @@ IDX_FILES = {
     "test_images": "t10k-images-idx3-ubyte.gz",
     "test_labels": "t10k-labels-idx1-ubyte.gz",
 }
+# Official release (https://github.com/zalandoresearch/fashion-mnist, MIT License),
+# MD5 sums as published with the files. The mirrors serve identical files; the
+# first reachable one is used and the checksum decides whether it is accepted.
+IDX_MD5 = {
+    "train-images-idx3-ubyte.gz": "8d4fb7e6c68d591d4c3dfef9ec88bf0d",
+    "train-labels-idx1-ubyte.gz": "25c81989df183df01b3e8a0aad5dffbe",
+    "t10k-images-idx3-ubyte.gz": "bef4ecab320f06d8554ea6380940ec79",
+    "t10k-labels-idx1-ubyte.gz": "bb300cfdad3c16e7a12a480ee83cd310",
+}
+DOWNLOAD_MIRRORS = (
+    "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/",
+    "https://raw.githubusercontent.com/zalandoresearch/fashion-mnist/master/data/fashion/",
+)
+DOWNLOAD_TIMEOUT_SECONDS = 60
 REACQUIRE_HINT = (
-    "Fashion-MNIST is missing. Re-acquire it with the command in "
-    "papers/power_of_data_qml/LOG.md (Data Acquisition Log)."
+    "Fashion-MNIST is missing and could not be downloaded; see the Data section "
+    "of papers/power_of_data_qml/README.md for the manual acquisition commands."
 )
 
 
 def dataset_dir(data_root: str | Path) -> Path:
     """Return ``<data_root>/power_of_data_qml/fashion_mnist``."""
     return Path(data_root) / PAPER_DATA_DIRNAME / DATASET_DIRNAME
+
+
+def _md5(payload: bytes) -> str:
+    return hashlib.md5(payload, usedforsecurity=False).hexdigest()
+
+
+def ensure_fashion_mnist(data_root: str | Path) -> Path:
+    """Download any missing IDX file, verifying its MD5 sum, and return the directory.
+
+    Parameters
+    ----------
+    data_root : str or pathlib.Path
+        Shared data root (``DATA_DIR`` or ``--data-root``).
+
+    Returns
+    -------
+    pathlib.Path
+        ``<data_root>/power_of_data_qml/fashion_mnist``.
+
+    Raises
+    ------
+    RuntimeError
+        If a file cannot be downloaded from any mirror with the expected checksum.
+    """
+    directory = dataset_dir(data_root)
+    for name, checksum in IDX_MD5.items():
+        target = directory / name
+        if target.is_file():
+            continue
+        failures = []
+        for mirror in DOWNLOAD_MIRRORS:
+            try:
+                with urllib.request.urlopen(
+                    mirror + name, timeout=DOWNLOAD_TIMEOUT_SECONDS
+                ) as response:
+                    payload = response.read()
+            except OSError as error:
+                failures.append(f"{mirror}: {error}")
+                continue
+            if _md5(payload) != checksum:
+                failures.append(f"{mirror}: MD5 mismatch")
+                continue
+            directory.mkdir(parents=True, exist_ok=True)
+            partial = target.with_suffix(target.suffix + ".part")
+            partial.write_bytes(payload)
+            partial.replace(target)
+            LOGGER.info("Downloaded %s from %s", name, mirror)
+            break
+        else:
+            raise RuntimeError(f"Could not download {name}: {'; '.join(failures)}")
+    return directory
 
 
 def _read_idx(path: Path, expected_magic: int) -> np.ndarray:
@@ -79,10 +147,10 @@ def load_fashion_mnist(data_root: str | Path) -> tuple[np.ndarray, np.ndarray]:
 
     Raises
     ------
-    FileNotFoundError
-        If any IDX file is missing.
+    RuntimeError
+        If a missing file cannot be downloaded (see ``ensure_fashion_mnist``).
     """
-    directory = dataset_dir(data_root)
+    directory = ensure_fashion_mnist(data_root)
     train_images = _read_idx(directory / IDX_FILES["train_images"], 0x803)
     train_labels = _read_idx(directory / IDX_FILES["train_labels"], 0x801)
     test_images = _read_idx(directory / IDX_FILES["test_images"], 0x803)

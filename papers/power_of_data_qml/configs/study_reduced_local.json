@@ -1,6 +1,11 @@
 {
   "description": "Reduced study for the laptop (partial, RED override): arXiv Figs. 1, 2, S1, S3 at n=3-16, 10 seeds, paper grids, paper + 5-fold CV protocols (CV at n=4,8,12,16). QK up to 17 qubits.",
   "study": {
+    "embeddings": [
+      "E1",
+      "E2",
+      "E3"
+    ],
     "system_sizes": [
       3,
       4,

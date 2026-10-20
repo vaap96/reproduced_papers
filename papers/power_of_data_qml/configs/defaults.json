@@ -1,5 +1,5 @@
 {
-  "description": "Smoke defaults: real Fashion-MNIST, n=3-4, 2 seeds, every study component, tiny 'smoke' model grids (not for reported results).",
+  "description": "Smoke defaults: real Fashion-MNIST, n=3, 1 seed, embeddings E1 and E3, every study component, tiny 'smoke' model grids; sized to finish within the repository smoke test's 120 s limit (not for reported results).",
   "experiment": "study",
   "seed": 0,
   "dtype": "float64",
@@ -15,16 +15,13 @@
   "study": {
     "embeddings": [
       "E1",
-      "E2",
       "E3"
     ],
     "system_sizes": [
-      3,
-      4
+      3
     ],
     "seeds": [
-      0,
-      1
+      0
     ],
     "components": [
       "dimension_geometry",
