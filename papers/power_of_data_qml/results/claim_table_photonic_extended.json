@@ -1,0 +1,8 @@
+{
+  "c9": {
+    "spearman_rho": 0.8555211558307534,
+    "p_value": 6.005632918162668e-06,
+    "points": 18,
+    "bound_above_error": 18
+  }
+}
